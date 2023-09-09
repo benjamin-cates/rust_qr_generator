@@ -22,13 +22,15 @@ impl QR {
             self.mask_index = i as u8;
             self.format_pattern();
             let pen = self.mask(mask);
-            self.to_image(format!("mask{}.png",i).as_str()).expect("");
             if pen < best_mask_penalty {
                 best_mask_idx = i;
                 best_mask_penalty = pen;
             }
             self.bitmap = bitmap_copy.clone();
         }
+        // Get best masked qr code
+        self.mask_index = best_mask_idx as u8;
+        self.format_pattern();
         self.mask(mask_fns[best_mask_idx]);
     }
 

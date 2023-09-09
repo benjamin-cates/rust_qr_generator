@@ -64,7 +64,7 @@ impl QR {
         let alignment_count = version / 7 + 2;
         return (version * 4 + 17).pow(2) // Num total blocks
             - 3 * 8 * 8 // Finder patterns
-            - (alignment_count.pow(2) - 3) * 5 * 5 // Alignment patterns
+            - if version == 1 {0} else {(alignment_count.pow(2) - 3) * 5 * 5} // Alignment patterns
             - 2 * (version * 4 + 1) // Timing patterns
             + (alignment_count - 2) * 5 * 2 //Add timing patterns overlapped with alignment
             - 2 * 15 // Error and mask info

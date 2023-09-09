@@ -4,6 +4,7 @@ mod tests {
     mod test_ec;
     mod test_mask;
     mod test_metadata;
+    mod test_qr;
 }
 mod error_correction;
 mod qr;

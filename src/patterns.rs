@@ -109,26 +109,10 @@ impl QR {
         let format_divisor: Vec<u8> = vec![1,0,1,0,0,1,1,0,1,1,1];
         let format_mask: Vec<u8> = vec![1,0,1,0,1,0,0,0,0,0,1,0,0,1,0];
 
-        // Get remainder from *normal* polynomial division
-        let mut rest = info.clone();
-        for x in 0..5 {
-            if rest[x] == 1 {
-                for (i, y) in format_divisor.iter().enumerate() {
-                    rest[x+i] ^= y;
-                }
-            }
-        }
-        if self.mask_index == 2 {
-            println!("Info {:?}",info);
-            println!("Divisor {:?}",format_divisor);
-            println!("Rest {:?}",rest);
-            println!("Mask {:?}",format_mask);
-        }
+        // Polynomial division for error correction
+        let rest = error_correction::poly_rest(&info, &format_divisor);
+        for (i, x) in rest.into_iter().enumerate() {info[i+5] = x;}
 
-        for (i, x) in rest.into_iter().skip(5).enumerate() {info[i+5] = x;}
-        if self.mask_index == 2 {
-            println!("Infonew {:?}",info);
-        }
         let width = self.bitmap.len();
         for (i, x) in info.iter().enumerate() {
             let bit = *x ^ format_mask[i];

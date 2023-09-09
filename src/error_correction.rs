@@ -86,7 +86,7 @@ lazy_static::lazy_static! {
 
 /// Multiplication on GF(256)
 pub fn mul(a: usize, b: usize) -> usize {
-    if a == 0 && b == 0 {0}
+    if a == 0 || b == 0 {0}
     else {EXPS.1[(EXPS.0[a] as usize + EXPS.0[b] as usize) % 255].into()}
 }
 

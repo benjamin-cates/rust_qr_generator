@@ -5,13 +5,19 @@ impl QR {
     /// Take series of bits and write the message on bitmap
     pub fn write_message(&mut self, message: Vec<u8>) {
         let width = self.bitmap.len();
-        let mut pos_x = width-1;
-        let mut pos_y = width-1;
-        let mut mode = 2;
+        let mut pos_x: usize = width-1;
+        let mut pos_y: usize = width-1;
+        let mut mode = 1;
+        
+        println!("Mess: {}, Version: {}",message.len(),self.version);
 
+        let mut num_modules = 0;
         for bit in message.iter().flat_map(|x| (0..8).map(|el| *x >> ((7-el)) & 1)) {
-            self.bitmap[pos_y][pos_x] = bit;
             loop {
+                if mode == 1 {
+                    mode = 2;
+                    break;
+                }
                 if mode == 2 {
                     pos_x -= 1;
                     mode = 3;
@@ -37,6 +43,7 @@ impl QR {
                 else if mode == 6 {
                     if pos_y == width-1 {
                         if pos_x == 0 {
+                            println!("Actual modules {}",num_modules);
                             panic!("Reached end of QR code");
                         }
                         else {
@@ -52,6 +59,8 @@ impl QR {
                 }
                 if self.pattern_mask[pos_y][pos_x] == patterns::PatternMaskType::None { break; }
             }
+            self.bitmap[pos_y][pos_x] = bit;
+            num_modules += 1;
         }
 
     }

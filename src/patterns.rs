@@ -65,7 +65,7 @@ impl QR {
         let n_gaps: i32 = self.version as i32 / 7 + 1;
         let width: i32 = self.bitmap.len() as i32;
         // Width of screen divided by number of gaps rounded up to nearest even number
-        let spacing = ((width - 12) as f32 / n_gaps as f32 / 2.0).ceil() as i32 * 2;
+        let spacing = ((width - 13) as f32 / n_gaps as f32 / 2.0).ceil() as i32 * 2;
         //Alignment patterns on the top and left edges
         for i in 1..n_gaps {
             self.alignment_pattern(width as i32-7-i*spacing,6);
@@ -133,24 +133,30 @@ impl QR {
         }
     }
 
+
     /// Places version information for codes at version 7 or higher
     fn version_information_pattern(&mut self) {
         use PatternMaskType::Version;
         if self.version < 7 {return ();}
         // Version divisor polynomial x^12 + x^11 + ... + x^2 + 1
-        let version_divisor: Vec<u8> = vec![1u8,1,1,1,1,0,0,1,0,0,1,0,1];
+        let version_divisor: Vec<u8> = vec![1,1,1,1,1,0,0,1,0,0,1,0,1];
         // Get version bit_list
         let mut version_bits: Vec<u8> = vec![];
         bits::push_to_bit_list(&mut version_bits,self.version as u32,6);
+        bits::push_to_bit_list(&mut version_bits, 0, 12);
         // Get error correction
         let ec_version = error_correction::poly_rest(&version_bits,&version_divisor);
+        for (i, x) in ec_version.into_iter().enumerate() {
+            version_bits[i+6] = x;
+        }
         // Place on image
-        let width = self.bitmap.len();
-        for (i, bit) in version_bits.iter().chain(ec_version.iter()).enumerate() {
+        let width = self.bitmap[0].len();
+        let height = self.bitmap.len();
+        for (i, bit) in version_bits.iter().rev().enumerate() {
             self.bitmap[i/3][i%3 + width-11] = *bit;
-            self.pattern_mask[i/3][i%3 + self.bitmap.len()-11] = Version;
-            self.bitmap[i%3 + width-11][i/3] = *bit;
-            self.pattern_mask[i%3 + self.bitmap.len()-11][i/3] = Version;
+            self.pattern_mask[i/3][i%3 + width-11] = Version;
+            self.bitmap[i%3 + height-11][i/3] = *bit;
+            self.pattern_mask[i%3 + height-11][i/3] = Version;
         }
     }
     

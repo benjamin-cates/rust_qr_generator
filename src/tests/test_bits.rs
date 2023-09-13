@@ -20,10 +20,10 @@ fn test_numeric() {
 fn test_alphanumeric() {
     use crate::bits::*;
     // Misc tests
-    assert_eq!(encode_alphanumeric(&String::from("AB")).unwrap(),vec![0,0,0,0,0,0,0,0,0,0,1]);
-    assert_eq!(encode_alphanumeric(&String::from("CB")).unwrap(),vec![0,0,0,0,1,0,1,1,0,1,1]);
-    assert_eq!(encode_alphanumeric(&String::from("B")).unwrap(),vec![0,0,0,0,0,1]);
-    assert_eq!(encode_alphanumeric(&String::from("AAB")).unwrap(),vec![0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]);
+    assert_eq!(encode_alphanumeric(&String::from("01")).unwrap(),vec![0,0,0,0,0,0,0,0,0,0,1]);
+    assert_eq!(encode_alphanumeric(&String::from("21")).unwrap(),vec![0,0,0,0,1,0,1,1,0,1,1]);
+    assert_eq!(encode_alphanumeric(&String::from("1")).unwrap(),vec![0,0,0,0,0,1]);
+    assert_eq!(encode_alphanumeric(&String::from("001")).unwrap(),vec![0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]);
     for x in 0..45 {
         assert_eq!(alphanumeric_char_to_idx(char::from_u32(ALPHANUMERIC_CHARS[x] as u32).unwrap()).unwrap(),x as u32);
     }

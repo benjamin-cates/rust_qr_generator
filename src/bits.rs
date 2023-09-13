@@ -39,14 +39,14 @@ pub(crate) fn get_encoding(str: &str) -> crate::qr::Encoding {
 
 /// List of characters in the QR "alphanumeric" mode
 #[cfg(test)]
-pub const ALPHANUMERIC_CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 $%*+-./:";
+pub const ALPHANUMERIC_CHARS: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
 /// Returns the index of a character in the QR "alphanumeric" mode
 /// Or None if it doesn't exist
 pub fn alphanumeric_char_to_idx(ch: char) -> Option<u32> {
     match ch {
-        'A'..='Z' => Some((ch as u32) - ('A' as u32)),
-        '0'..='9' => Some(26 + (ch as u32) - ('0' as u32)),
+        '0'..='9' => Some((ch as u32) - ('0' as u32)),
+        'A'..='Z' => Some(10 + (ch as u32) - ('A' as u32)),
         ' ' => Some(36),
         '$' => Some(37),
         '%' => Some(38),

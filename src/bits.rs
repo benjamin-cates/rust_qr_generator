@@ -43,7 +43,7 @@ pub const ALPHANUMERIC_CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 $%*
 
 /// Returns the index of a character in the QR "alphanumeric" mode
 /// Or None if it doesn't exist
-fn alphanumeric_char_to_idx(ch: char) -> Option<u32> {
+pub fn alphanumeric_char_to_idx(ch: char) -> Option<u32> {
     match ch {
         'A'..='Z' => Some((ch as u32) - ('A' as u32)),
         '0'..='9' => Some(26 + (ch as u32) - ('0' as u32)),

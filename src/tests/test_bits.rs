@@ -25,6 +25,9 @@ fn test_alphanumeric() {
     assert_eq!(encode_alphanumeric(&String::from("B")).unwrap(),vec![0,0,0,0,0,1]);
     assert_eq!(encode_alphanumeric(&String::from("AAB")).unwrap(),vec![0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]);
     for x in 0..45 {
+        assert_eq!(alphanumeric_char_to_idx(char::from_u32(ALPHANUMERIC_CHARS[x] as u32).unwrap()).unwrap(),x as u32);
+    }
+    for x in 0..45 {
         for y in 0..45 {
             // Test all two character strings
             let str: String = [

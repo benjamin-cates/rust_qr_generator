@@ -75,7 +75,7 @@ pub fn get_codewords(bits: &Vec<u8>, num_chars: usize, enc: Encoding, version: u
     let mut message: Vec<u8> = Vec::with_capacity(num_codewords * 8);
     for x in message_metadata.iter() {message.push(*x);}
     for x in bits.iter() {message.push(*x);}
-    let leftover = message.len() - (message.len()/8)*8;
+    let leftover = ((message.len() + 8 - 1)/8)*8 - message.len();
     for _ in 0..leftover {message.push(0);}
     
     // Convert bit list to 8-bit codewords
@@ -84,7 +84,7 @@ pub fn get_codewords(bits: &Vec<u8>, num_chars: usize, enc: Encoding, version: u
         message_as_codewords.push(bits::collect_bits(x).try_into().unwrap());
     }
     while message_as_codewords.len() < num_codewords {
-        message_as_codewords.push(if message_as_codewords.len() % 2 == 1 {236} else {17});
+        message_as_codewords.push(if message_as_codewords.len() % 2 == 0 {236} else {17});
     }
     return message_as_codewords;
 }

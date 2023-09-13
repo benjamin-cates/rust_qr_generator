@@ -44,6 +44,7 @@ fn main() -> Result<(),std::io::Error> {
     
     let qr_code = qr::QR::new(&str,encoding,ec_level);
     println!("Encoded string: \"{}\"",str);
+    println!("Encoding type: {:?}",encoding);
     println!("Version: {}",qr_code.version);
     println!("Error correction: {:?}",qr_code.ec_level);
     println!("Number of codewords: {}",metadata::blocks_table_get(qr_code.version,qr_code.ec_level).0);

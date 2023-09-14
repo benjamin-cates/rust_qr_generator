@@ -95,7 +95,7 @@ pub(crate) fn get_codewords(bits: &Vec<u8>, num_chars: usize, enc: Encoding, ver
 
 impl QR {
     /// Returns the minimum QR version needed to store a message
-    pub(crate) fn get_min_version(str: &String, enc: Encoding, ec_level: ECLevel) -> (u8,usize) {
+    pub(crate) fn get_min_version(str: &str, enc: Encoding, ec_level: ECLevel) -> (u8,usize) {
         let num_chars = str.chars().count();
         let num_bits = match enc {
             Encoding::Numeric => num_chars / 3 * 10 

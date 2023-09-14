@@ -23,7 +23,7 @@ pub enum Encoding {
 
 impl QR {
     /// Create a qr code from str using encoding
-    pub fn new(str: &String, enc: Encoding, ec_level: ECLevel) -> QR {
+    pub fn new(str: &str, enc: Encoding, ec_level: ECLevel) -> QR {
         // Get encoded string
         let bits: Vec<u8> = match enc {
             Encoding::Alphanumeric => bits::encode_alphanumeric(&str),

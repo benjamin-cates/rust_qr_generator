@@ -67,7 +67,7 @@ pub fn alphanumeric_char_to_idx(ch: char) -> Option<u32> {
 
 /// Encodes a string into a bit list using QR's "alphanumeric" mode
 /// Supported characters are A-Z, 0-9, space, and $%*+-./:
-pub(crate) fn encode_alphanumeric(str: &String) -> Result<BitList, char> {
+pub(crate) fn encode_alphanumeric(str: &str) -> Result<BitList, char> {
     let mut out: BitList = Vec::with_capacity(str.len() * 11 / 2 + 1);
     for chpair in str.chars().collect::<Vec<char>>().chunks(2) {
         // Pairs of characters are represented with 11 bits
@@ -108,7 +108,7 @@ pub(crate) fn decode_alphanumeric(seq: BitList) -> Option<String> {
 
 /// Converts string of digits to a bit string.
 /// Throws error if characters are not all 0-9
-pub(crate) fn encode_numeric(str: &String) -> Result<BitList, char> {
+pub(crate) fn encode_numeric(str: &str) -> Result<BitList, char> {
     let len = str.len();
     let mut digits: Vec<u32> = Vec::with_capacity(len);
     for ch in str.chars() {
@@ -165,7 +165,7 @@ pub(crate) fn decode_numeric(seq: BitList) -> Option<String> {
 
 /// Converts UTF-8 string to Latin-1 string encoded as bits
 /// Returns invalid character if found (unicode code point > 255)
-pub(crate) fn encode_latin(str: &String) -> Result<BitList, char> {
+pub(crate) fn encode_latin(str: &str) -> Result<BitList, char> {
     let mut out: Vec<u8> = Vec::with_capacity(str.len() * 8);
     for ch in str.chars() {
         if ch > 255.into() {
@@ -188,7 +188,7 @@ pub(crate) fn decode_latin(seq: BitList) -> Option<String> {
     return Some(out);
 }
 
-//pub(crate) fn encode_utf8(str: &String) -> Result<BitList, char> {
+//pub(crate) fn encode_utf8(str: &str) -> Result<BitList, char> {
 //    ECI Coding identity: 0111
 //    UTF-8 id: 0d26
 //    panic!("Not implemented");
@@ -198,7 +198,7 @@ pub(crate) fn decode_latin(seq: BitList) -> Option<String> {
 //    panic!("Not implemented");
 //}
 
-//pub(crate) fn encode_kanji(str: &String) -> Result<BitList, char> {
+//pub(crate) fn encode_kanji(str: &str) -> Result<BitList, char> {
 //    panic!("Not implemented");
 //}
 

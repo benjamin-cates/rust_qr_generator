@@ -8,7 +8,7 @@ impl QR {
         let mut pos_x: usize = width-1;
         let mut pos_y: usize = width-1;
         let mut mode = 1;
-        /// Iterates through each bit
+        // Iterates through each bit
         for bit in message.iter().flat_map(|x| (0..8).map(|el| *x >> ((7-el)) & 1)) {
             loop {
                 if mode == 1 {

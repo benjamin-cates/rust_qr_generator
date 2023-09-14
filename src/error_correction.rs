@@ -4,9 +4,13 @@ type Polynomial = Vec<u8>;
 
 #[derive(PartialEq,Eq,Copy,Clone,Debug)]
 pub enum ECLevel {
+    /// Low error correction, allows up to 7% bit loss
     L,
+    /// Medium error correction, allows up to 15% bit loss
     M,
+    /// Quartile error correction, allows up to 25% bit loss
     Q,
+    /// High error correction, allows up to 30% bit loss
     H
 }
 
@@ -48,14 +52,15 @@ pub fn ec_encode(message: Vec<u8>, version: u8, ec_level: ECLevel) -> Vec<u8> {
 }
 
 /// Returns error correction on group
-pub fn ec_group(message: &[u8], ec_count: usize) -> Vec<u8> {
+pub(crate) fn ec_group(message: &[u8], ec_count: usize) -> Vec<u8> {
     assert!(ec_count <= 30);
     let mut new_mess = message.to_vec();
     for _ in 0..ec_count {new_mess.push(0);}
     return poly_rest(&new_mess, &GENERATOR_POLY[ec_count]);
 }
 
-pub const EXPS: ([u8;256],[u8;256]) = generate_log();
+pub(crate) const EXPS: ([u8;256],[u8;256]) = generate_log();
+/// Generates (log, exp) table of GF(256)
 const fn generate_log() -> ([u8;256],[u8;256]) {
     let mut exp: usize = 1;
     let mut value: usize = 1;
@@ -72,7 +77,7 @@ const fn generate_log() -> ([u8;256],[u8;256]) {
 }
 
 lazy_static::lazy_static! {
-    pub static ref GENERATOR_POLY: Vec<Vec<u8>> = {
+    pub(crate) static ref GENERATOR_POLY: Vec<Vec<u8>> = {
         let mut out = Vec::with_capacity(30);
         let mut cur = vec![1];
         out.push(vec![1]);
@@ -85,18 +90,18 @@ lazy_static::lazy_static! {
 }
 
 /// Multiplication on GF(256)
-pub fn mul(a: usize, b: usize) -> usize {
+pub(crate) fn mul(a: usize, b: usize) -> usize {
     if a == 0 || b == 0 {0}
     else {EXPS.1[(EXPS.0[a] as usize + EXPS.0[b] as usize) % 255].into()}
 }
 
 /// Division on GF(256)
-pub fn div(a: usize, b: usize) -> usize {
+pub(crate) fn div(a: usize, b: usize) -> usize {
     return EXPS.1[(EXPS.0[a] as usize + EXPS.0[b] as usize * 254) % 255].into();
 }
 
 /// Polynomial multiplication on GF(256)
-pub fn poly_mul(a: &Polynomial, b: &Polynomial) -> Polynomial {
+pub(crate) fn poly_mul(a: &Polynomial, b: &Polynomial) -> Polynomial {
     let mut out: Vec<u8> = vec![0;a.len()+b.len()-1];
     for (i, a_coef) in a.iter().enumerate() {
         for (j, b_coef) in b.iter().enumerate() {
@@ -107,7 +112,7 @@ pub fn poly_mul(a: &Polynomial, b: &Polynomial) -> Polynomial {
 }
 
 /// Polynomial remainder on GF(256)
-pub fn poly_rest(a: &Polynomial, b: &Polynomial) -> Polynomial {
+pub(crate) fn poly_rest(a: &Polynomial, b: &Polynomial) -> Polynomial {
     let mut rest = (*a).clone();
     let quotient_len = a.len() - b.len() + 1;
     for x in 0..quotient_len {

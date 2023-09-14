@@ -4,8 +4,10 @@ use crate::patterns::PatternMaskType;
 
 impl QR {
     /// Find best mask and apply it
+    /// The best mask is the one with the lowest penalty score
     pub fn apply_masking(&mut self) {
         let bitmap_copy = self.bitmap.clone();
+        // List of mask functions
         let mask_fns: Vec<&dyn Fn(usize,usize)->bool> = vec![
             &|x, y| {(x+y)%2 == 0},
             &|_, y| {y%2 == 0},
@@ -18,6 +20,7 @@ impl QR {
         ];
         let mut best_mask_idx = 0;
         let mut best_mask_penalty = i32::MAX;
+        // Apply each mask
         for (i, mask) in mask_fns.iter().enumerate() {
             self.mask_index = i as u8;
             self.format_pattern();

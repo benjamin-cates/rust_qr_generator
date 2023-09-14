@@ -6,8 +6,8 @@ mod tests {
     mod test_metadata;
     mod test_qr;
 }
-mod error_correction;
-mod qr;
+pub mod error_correction;
+pub mod qr;
 mod mask;
 mod patterns;
 mod message_layout;
@@ -17,6 +17,7 @@ use std::io::Write;
 
 fn main() -> Result<(),std::io::Error> {
 
+    // Read string to encode
     let mut str = String::new();
     print!("Enter encoded string: ");
     std::io::stdout().flush()?;
@@ -26,6 +27,7 @@ fn main() -> Result<(),std::io::Error> {
         str = str[..str.len()-1].to_string();
     }
 
+    // Read error correction level
     let mut ec_str = String::new();
     print!("Enter error correction level (LMQH): ");
     std::io::stdout().flush()?;
@@ -43,6 +45,8 @@ fn main() -> Result<(),std::io::Error> {
     let file_path = "output.png";
     
     let qr_code = qr::QR::new(&str,encoding,ec_level);
+
+    // Print information on QR encoding
     println!("Encoded string: \"{}\"",str);
     println!("Encoding type: {:?}",encoding);
     println!("Version: {}",qr_code.version);

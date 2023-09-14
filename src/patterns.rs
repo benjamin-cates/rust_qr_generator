@@ -2,7 +2,39 @@ use crate::qr::QR;
 use crate::bits;
 use crate::error_correction;
 
-#[derive(Copy,Clone,Debug,PartialEq,Eq)]
+/*
+
+Version 2 QR code patterns
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+[4,4,4,4,4,4,2,4,4,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4,4],
+[0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,3,3,3,3,3,0,0,0,0],
+[1,1,1,1,1,1,1,1,6,0,0,0,0,0,0,0,3,3,3,3,3,0,0,0,0],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,3,3,3,3,3,0,0,0,0],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,3,3,3,3,3,0,0,0,0],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,3,3,3,3,3,0,0,0,0],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[1,1,1,1,1,1,1,1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+ */
+#[derive(Copy,Clone,PartialEq,Eq)]
+/// Extra information on what pattern type is being covered
+/// Data type for QR.pattern_mask
 pub enum PatternMaskType {
     None = 0,
     Finder = 1,
@@ -27,7 +59,7 @@ impl QR {
         self.dark_module();
     }
     
-    /// Creates a finder pattern with fixed top left position
+    /// Creates a finder pattern given the top left position
     fn create_finder(&mut self, left: usize, top: usize) {
         use PatternMaskType::Finder;
         let x_center: usize = if left==0 {3} else {4};
@@ -60,6 +92,7 @@ impl QR {
     }
 
     /// Places all alignment patterns
+    /// These patterns are in the main area of the QR code
     fn alignment_patterns(&mut self) {
         if self.version == 1 {return;}
         let n_gaps: i32 = self.version as i32 / 7 + 1;
@@ -93,6 +126,7 @@ impl QR {
     }
 
     /// Places formatting pattern for error correction level and mask id
+    /// This pattern wraps around the finder patterns
     pub fn format_pattern(&mut self) {
         use PatternMaskType::Format;
         use error_correction::ECLevel::*;
@@ -135,6 +169,7 @@ impl QR {
 
 
     /// Places version information for codes at version 7 or higher
+    /// These are located next to the bottom left and top right finder patterns
     fn version_information_pattern(&mut self) {
         use PatternMaskType::Version;
         if self.version < 7 {return ();}
@@ -160,12 +195,10 @@ impl QR {
         }
     }
     
-    /// Places dark module on the top right corner of the bottom left finder pattern
+    /// Places single dark module on the top right corner of the bottom left finder pattern
     fn dark_module(&mut self) {
         use PatternMaskType::DarkModule;
         self.bitmap[4 * self.version as usize + 9][8] = 1;
         self.pattern_mask[4 * self.version as usize+ 9][8] = DarkModule;
     }
-    
-    
 }

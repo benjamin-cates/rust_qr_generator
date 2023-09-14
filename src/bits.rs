@@ -15,6 +15,8 @@ pub(crate) fn push_to_bit_list(bit_list: &mut BitList, value: u32, bit_count: u3
     }
 }
 
+/// Takes a list of bits and returns the integer value
+/// Example: collect_bits([0,1,1,0]) == 6
 pub(crate) fn collect_bits(bits: &[u8]) -> usize {
     let mut val: usize = 0;
     for x in bits {
@@ -23,6 +25,11 @@ pub(crate) fn collect_bits(bits: &[u8]) -> usize {
     return val;
 }
 
+/// Returns the most ideal encoding for the given string
+/// If the message is purely numeric, returns Numeric
+/// If the message only has alphanumeric chars, returns Alphanumeric
+/// If the characters fit in Latin-1, returns Byte
+/// Else returns ECI mode for UTF-8
 pub(crate) fn get_encoding(str: &str) -> crate::qr::Encoding {
     use crate::qr::Encoding::*;
     if str.chars().all(|ch| ch >= '0' && ch <= '9') {
@@ -59,14 +66,18 @@ pub fn alphanumeric_char_to_idx(ch: char) -> Option<u32> {
 }
 
 /// Encodes a string into a bit list using QR's "alphanumeric" mode
+/// Supported characters are A-Z, 0-9, space, and $%*+-./:
 pub(crate) fn encode_alphanumeric(str: &String) -> Result<BitList, char> {
     let mut out: BitList = Vec::with_capacity(str.len() * 11 / 2 + 1);
     for chpair in str.chars().collect::<Vec<char>>().chunks(2) {
+        // Pairs of characters are represented with 11 bits
+        // where the number is ch0 * 45 + ch1
         if chpair.len() == 2 {
             let number = alphanumeric_char_to_idx(chpair[0]).ok_or(chpair[0])? * 45
                 + alphanumeric_char_to_idx(chpair[1]).ok_or(chpair[1])?;
             push_to_bit_list(&mut out, number, 11);
         }
+        // Lone chars at the end of the string are represented with 6 bits
         if chpair.len() == 1 {
             push_to_bit_list(&mut out, alphanumeric_char_to_idx(chpair[0]).ok_or(chpair[0])?, 6);
         }
@@ -78,6 +89,7 @@ pub(crate) fn encode_alphanumeric(str: &String) -> Result<BitList, char> {
 #[cfg(test)]
 pub(crate) fn decode_alphanumeric(seq: BitList) -> Option<String> {
     let mut out: String = String::with_capacity(seq.len() / 11 + 1);
+    // Chunks into bit sequence of size 11 or a trailing sequence of 6
     for bits in seq.chunks(11) {
         // Get number from bit sequence
         let val = collect_bits(bits);
@@ -95,7 +107,7 @@ pub(crate) fn decode_alphanumeric(seq: BitList) -> Option<String> {
 }
 
 /// Converts string of digits to a bit string.
-/// Assumes all characters are 0-9.
+/// Throws error if characters are not all 0-9
 pub(crate) fn encode_numeric(str: &String) -> Result<BitList, char> {
     let len = str.len();
     let mut digits: Vec<u32> = Vec::with_capacity(len);
@@ -121,22 +133,27 @@ pub(crate) fn encode_numeric(str: &String) -> Result<BitList, char> {
 
 #[cfg(test)]
 const NUMERIC_CHARS: &[u8] = b"0123456789";
+
 #[cfg(test)]
+/// Decodes a bitlist into a numeric message
 pub(crate) fn decode_numeric(seq: BitList) -> Option<String> {
     let mut out: String = String::from("");
     for bits in seq.chunks(10) {
         let collect = collect_bits(bits);
+        // 10 bits corresponds to 3 digits
         if bits.len() == 10 {
             if collect >= 1000 {return None;}
             out.push(NUMERIC_CHARS[collect/100] as char);
             out.push(NUMERIC_CHARS[(collect/10)%10] as char);
             out.push(NUMERIC_CHARS[collect%10] as char);
         }
+        // 7 bits corresponds to 2 digits
         else if bits.len() == 7 {
             if collect >= 100 {return None;}
             out.push(NUMERIC_CHARS[(collect/10)%10] as char);
             out.push(NUMERIC_CHARS[collect%10] as char);
         }
+        // 4 bits corresponds to 1 digit
         else if bits.len() == 4 {
             if collect >= 10 {return None;}
             out.push(NUMERIC_CHARS[collect%10] as char);
@@ -146,8 +163,8 @@ pub(crate) fn decode_numeric(seq: BitList) -> Option<String> {
     return Some(out);
 }
 
-/// Converts UTF-8 string to Latin-1 encoded string as bits
-/// Returns invalid character if found
+/// Converts UTF-8 string to Latin-1 string encoded as bits
+/// Returns invalid character if found (unicode code point > 255)
 pub(crate) fn encode_latin(str: &String) -> Result<BitList, char> {
     let mut out: Vec<u8> = Vec::with_capacity(str.len() * 8);
     for ch in str.chars() {
@@ -161,6 +178,7 @@ pub(crate) fn encode_latin(str: &String) -> Result<BitList, char> {
 }
 
 #[cfg(test)]
+/// Decodes bitlist into latin characters
 pub(crate) fn decode_latin(seq: BitList) -> Option<String> {
     let mut out: String = String::with_capacity(seq.len() / 8);
     for bits in seq.chunks(8) {

@@ -3,8 +3,9 @@ use crate::qr::Encoding;
 use crate::qr::QR;
 use crate::error_correction::ECLevel;
 
-/// Stores tuple of (number of EC codewords per block, number of blocks)
-pub const BLOCKS_TABLE: [[(usize,usize,usize);4];40] = [
+/// Stores tuple of (number of EC codewords per block, number of blocks) 
+/// Accessed by BLOCKS_TABLE[ version ][ ECLevel ]
+pub(crate) const BLOCKS_TABLE: [[(usize,usize,usize);4];40] = [
   [(19, 7, 1),   (16, 10, 1),  (13, 13, 1),  (9, 17, 1)],
   [(34, 10, 1),  (28, 16, 1),  (22, 22, 1),  (16, 28, 1)],
   [(55, 15, 1),  (44, 26, 1),  (34, 18, 2),  (26, 22, 2)],
@@ -46,6 +47,8 @@ pub const BLOCKS_TABLE: [[(usize,usize,usize);4];40] = [
   [(2812, 30, 24), (2216, 28, 47), (1582, 30, 65), (1222, 30, 77)],
   [(2956, 30, 25), (2334, 28, 49), (1666, 30, 68), (1276, 30, 8)],
 ];
+/// Get element in the QR code block layout table
+/// Returns (number of data codewords, EC codewords per block, number blocks)
 pub fn blocks_table_get(version: u8, ec_level: ECLevel) -> (usize,usize,usize) {
     use ECLevel::*;
     return BLOCKS_TABLE[version as usize-1][match ec_level {L => 0, M => 1, Q => 2, H => 3}];
@@ -67,7 +70,8 @@ fn num_length_bits(version: u8, enc: Encoding) -> u32 {
     }]
 }
 
-pub fn get_codewords(bits: &Vec<u8>, num_chars: usize, enc: Encoding, version: u8, num_codewords: usize) -> Vec<u8> {
+/// Given list of encoded bits and metadata, returns bit list with metadata encoded
+pub(crate) fn get_codewords(bits: &Vec<u8>, num_chars: usize, enc: Encoding, version: u8, num_codewords: usize) -> Vec<u8> {
     let length_len = num_length_bits(version,enc);
     let mut message_metadata: Vec<u8> = Vec::with_capacity(4+length_len as usize);
     bits::push_to_bit_list(&mut message_metadata,enc as u32,4);
@@ -90,7 +94,8 @@ pub fn get_codewords(bits: &Vec<u8>, num_chars: usize, enc: Encoding, version: u
 }
 
 impl QR {
-    pub fn get_min_version(str: &String, enc: Encoding, ec_level: ECLevel) -> (u8,usize) {
+    /// Returns the minimum QR version needed to store a message
+    pub(crate) fn get_min_version(str: &String, enc: Encoding, ec_level: ECLevel) -> (u8,usize) {
         let num_chars = str.chars().count();
         let num_bits = match enc {
             Encoding::Numeric => num_chars / 3 * 10 

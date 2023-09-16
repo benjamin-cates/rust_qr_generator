@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>QR Generator</title>
+        <meta charset="utf-8" />
+        <meta name="keywords" content="Rust QR Generator" />
+        <meta name="author" content="Benjamin Cates" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <script type="module">
+            import init, {make_qr} from "./pkg/qr_generator.js";
+            init().then( _ => {
+                window.make_qr = make_qr;
+            });
+        </script>
+        <script src="dist/qr_printer.js"></script>
+        <link rel="stylesheet" href="dist/style.css" />
+    </head>
+    
+    <body>
+        <h1>Rust QR Generator</h1>
+        <input autofocus type="text" id="qr_input" placeholder="Enter text to encode" oninput="print_qr_code(this.value)"/>
+        <canvas id="qr_canvas"> </canvas>
+    
+    
+    </body>
+</html>
